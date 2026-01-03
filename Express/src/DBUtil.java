@@ -6,7 +6,6 @@ public class DBUtil {
     private static String USERNAME;
     private static String PASSWORD;
     private static String URL;
-    private static String DRIVER;
 
     static {
         try (InputStream config_in = DBUtil.class.getClassLoader().getResourceAsStream("resources/config.properties")) {
@@ -19,20 +18,18 @@ public class DBUtil {
             USERNAME = prop.getProperty("db.username");
             PASSWORD = prop.getProperty("db.password");
             URL = prop.getProperty("db.url");
-            DRIVER = prop.getProperty("db.driver");
-            System.out.println("username: " + USERNAME);
-            System.out.println("password: " + PASSWORD);
-            // Class.forName(DRIVER);
+            Class.forName("org.mariadb.jdbc.Driver");
         } catch (Exception e) {
             // Whatever
+            e.printStackTrace();
         } finally {
             // Whatever
         }
     }
 
-    public static void /*Connection*/ getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         System.out.println("username: " + USERNAME);
         System.out.println("password: " + PASSWORD);
-        // return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
 }

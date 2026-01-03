@@ -1,0 +1,3 @@
+db.url=jdbc:mariadb://localhost:3306/test
+db.username=TODO
+db.password=TODO
