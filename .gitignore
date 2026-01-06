@@ -17,6 +17,7 @@
 bin/
 target/
 out/
+run.sh
 
 # IDE
 .idea/
