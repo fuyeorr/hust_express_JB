@@ -36,3 +36,149 @@
 1. 设计业务逻辑，考虑需要支持什么业务
 1. 开发业务逻辑
 1. 开发图形界面
+
+
+## 建库建表
+
+#### PK:Primary Key(主键)
+#### FK:Foreign Key(外键)
+
+## 1. 用户 User
+```sql
+(
+    userID(PK),
+    name,
+    phone,
+    address,
+    sex,
+    userType(收件/寄件)
+)
+```
+
+## 2.订单 Order
+```sql
+(
+    orderID(PK),   
+    senderID (FK,User(userID)),   
+    receiverID (FK,User(userID)),   
+    startTime,
+    orderStatus(正常/异常),
+    cost
+)
+```
+
+## 3.包裹 Package
+```sql
+(
+    packageID(PK),
+    orderID(FK,Order(OrderID)),
+    weight,
+    volume,
+    packageStatus(正常/易碎物/贵重物/保鲜物/...),
+    currentStatus()
+)
+```
+
+## 4.快递公司 Company
+```sql
+(
+    companyID(PK),
+    companyName,
+    companyCode(编码),
+    companyPhone
+)
+```
+
+## 5.运单 WayBill
+```sql
+(
+    wayID(PK),
+    packageID(FK,Package(packageID)),
+    companyID(FK,Company(companyID)),
+    origin,
+    destination,
+    sendTime,
+    wayStatus(已揽收/运输中)
+)
+```
+
+## 6. 快递员 DeliveryMan
+```sql
+(
+    deliveryID(PK),
+    companyID(FK,Company(companyID)),
+    delName,
+    delPhone,
+    delSex,
+    delType(同城运送/干线转运)
+)
+```
+
+## 7.轨迹 Track
+```sql
+(
+    trackID(PK),
+    wayID(FK,wayBill(wayID)),
+    deliveryID(FK,DeliveryMan(deliveryID)),
+    trackTime,
+    currentLocation,
+    trackInfo(物流简述)
+)
+```
+
+## 8.驿站 Station
+```sql
+(
+    stationID(PK),
+    stationName,
+    location,
+    stationCode,
+    stationPhone
+)
+```
+
+## 9.工作人员 Staff
+```sql
+(
+    staffID(PK),
+    stationID(FK,station(stationID)),
+    staffName,
+    staffSex,
+    staffPhone,
+    staffRole(管理员/派送员/整理仓库者/...)
+)
+```
+
+## 10. 异常信息 Exception
+```sql
+(
+    exceptionID(PK),
+    packageID(FK,Package(packageID)),
+    exceptionType(缺货/丢失/破损/延误/...),
+    exceptionName,
+    description(异常说明)
+)
+```
+
+## 11. 入库信息 Storage
+```sql
+(
+    packageID(FK,Package(packageID)),
+    stationID(FK,Station(stationID)),
+    storageTame,
+    storageCode(入库编码),
+    storageStatus(正常/异常),
+    Primary Key{packageID,stationID}
+)
+```
+
+## 12. 签收记录 Sign
+```sql
+(
+    signID(PK),
+    packageID(FK,Package(PackageID)),
+    stationID(FK,Station(stationID)),
+    receiverID(FK,User(UserID)),
+    signType(送货上门/驿站自取),
+    signTime
+)
