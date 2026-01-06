@@ -55,7 +55,7 @@
 )
 ```
 
-## 2.订单 Order
+## 2.订单 Orders
 ```sql
 (
     orderID(PK),   
