@@ -1,4 +1,8 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +104,7 @@ public abstract class BaseDAO<T, PKT> {
 
     protected abstract String getDeleteSQL();
 
-    protected abstract void setGeneratedId(T entity, ResultSet rs);
+    protected abstract void setGeneratedId(T entity, ResultSet rs) throws SQLException;
 
     protected abstract void SetInsertParameter(PreparedStatement pstmt, T entity);
 

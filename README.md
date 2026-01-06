@@ -18,8 +18,10 @@
 ### 当前进度
 - [x] `DBUtil` 从配置文件读取数据库配置信息
 - [x] `DBUtil` 配置正确的数据库信息并连接到数据库
-- [ ] `DBUtil` 完成初步的 SQL 语句查询，采用 `PreparedStatement` 进行参数化查询
-- [ ] 快递驿站需求分析和表设计
+- [x] 快递驿站需求分析和表设计
+- [x] `Model`
+- [x] `DAO` 完成初步的 SQL 语句查询，采用 `PreparedStatement` 进行参数化查询
+- [ ] 业务逻辑实现
 
 ### 第一阶段
 
@@ -30,6 +32,7 @@
 
 1. 按照表设计将 Model 模块完成
 1. 按照 Model 将 DAO模块完成
+1. DAO 层统一继承 `BaseDAO`，Model 提供标准 getter/setter 以便 DAO 在 `Set*Parameter`/`mapResultSetToEntity` 中按字段映射，复杂主键（如 Storage）可额外定义复合键类供 DAO 接口使用
 
 ### 第三阶段
 
