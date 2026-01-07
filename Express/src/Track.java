@@ -58,4 +58,22 @@ public class Track {
     public void setTrackInfo(String trackInfo) {
         this.trackInfo = trackInfo;
     }
+
+    // UI
+    public java.sql.Timestamp getUpdateTime() {
+        return getTrackTime();
+    }
+
+    public String getLocation() {
+        return getCurrentLocation();
+    }
+
+    public String getStatus() {
+        // no dedicated status field; reuse trackInfo as status/description
+        return getTrackInfo();
+    }
+
+    public String getDescription() {
+        return getTrackInfo();
+    }
 }

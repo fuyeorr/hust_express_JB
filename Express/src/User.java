@@ -5,6 +5,7 @@ public class User {
     private String address;
     private String sex;
     private String userType;
+    private String password;
 
     public User() {
     }
@@ -55,5 +56,13 @@ public class User {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

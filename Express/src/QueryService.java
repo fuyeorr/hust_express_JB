@@ -44,4 +44,23 @@ public class QueryService {
                 .filter(s -> s.getPackageID() == packageID)
                 .forEach(System.out::println);
     }
+
+        // Convenience helpers for UI
+        public PackageEntity getPackageInfo(int packageID) {
+                return packageDAO.findByID(packageID);
+        }
+
+        public java.util.List<Track> getPackageTracks(int packageID) {
+                return trackDAO.findAll();
+        }
+
+        public String getPackageExceptions(int packageID) {
+                StringBuilder sb = new StringBuilder();
+                for (ExceptionRecord ex : exceptionDAO.findAll()) {
+                        if (ex.getPackageID() != null && ex.getPackageID() == packageID) {
+                                sb.append(ex.getDescription()).append("\n");
+                        }
+                }
+                return sb.length() == 0 ? null : sb.toString();
+        }
 }
