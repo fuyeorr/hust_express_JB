@@ -3,7 +3,7 @@ DROP DATABASE IF EXISTS express_db;
 CREATE DATABASE express_db;
 USE express_db;
 
--- 2. 用户表 vf
+-- 2. 用户表
 DROP TABLE IF EXISTS user;
 CREATE TABLE user (
     userID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
