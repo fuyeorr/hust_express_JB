@@ -208,3 +208,68 @@ INSERT INTO storage VALUES
 INSERT INTO sign (packageID, stationID, receiverID, signType, signTime) VALUES
 (1, 1, 2, '送货上门', '2026-01-06 12:00:00'),
 (2, 2, 3, '驿站自取', '2026-01-06 13:00:00');
+
+-- 查看每个订单及其寄件人和收件人的信息
+CREATE OR REPLACE VIEW view_order_info AS
+SELECT 
+    o.orderID,
+    o.startTime,
+    o.orderStatus,
+    o.cost,
+    s.userID AS senderID,
+    s.name AS senderName,
+    r.userID AS receiverID,
+    r.name AS receiverName
+FROM orders o
+JOIN user s ON o.senderID = s.userID
+JOIN user r ON o.receiverID = r.userID;
+
+-- 查看当前包裹状态及所在驿站（如果已入库）
+CREATE OR REPLACE VIEW view_package_status AS
+SELECT 
+    p.packageID,
+    p.orderID,
+    p.packageStatus,
+    p.currentStatus,
+    st.stationName AS currentStation
+FROM package p
+LEFT JOIN storage stg ON p.packageID = stg.packageID
+LEFT JOIN station st ON stg.stationID = st.stationID;
+
+-- 计算某个用户所有订单的总费用
+DELIMITER $$
+CREATE PROCEDURE sp_user_total_cost(IN in_userID INT, OUT out_total DECIMAL(10,2))
+BEGIN
+    SELECT SUM(cost) INTO out_total
+    FROM orders
+    WHERE senderID = in_userID OR receiverID = in_userID;
+END$$
+DELIMITER ;
+
+-- 当包裹状态被更新为“已入库”，自动在storage表插入一条记录
+DELIMITER $$
+CREATE TRIGGER trg_package_after_update
+AFTER UPDATE ON package
+FOR EACH ROW
+BEGIN
+    IF NEW.currentStatus = '已入库' THEN
+        INSERT INTO storage(packageID, stationID, storageTime, storageCode, storageStatus)
+        VALUES (NEW.packageID, 7001, NOW(), CONCAT('ST', NEW.packageID), '正常');
+    END IF;
+END$$
+DELIMITER ;
+
+-- 当插入异常信息时，自动将包裹状态改为“异常”
+DELIMITER $$
+CREATE TRIGGER trg_exception_after_insert
+AFTER INSERT ON exception
+FOR EACH ROW
+BEGIN
+    UPDATE package
+    SET currentStatus = '异常'
+    WHERE packageID = NEW.packageID;
+END$$
+DELIMITER ;
+
+
+
