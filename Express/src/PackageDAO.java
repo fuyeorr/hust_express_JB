@@ -4,17 +4,55 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class PackageDAO extends BaseDAO<PackageEntity, Integer> {
-
-    private static final String TABLE = "`Package`";
+    private static final String TABLE = "package";
 
     @Override
     protected String getFindAllSQL() {
-        return "SELECT packageID, orderID, weight, volume, packageStatus, currentStatus FROM " + TABLE;
+        return "SELECT " +
+               "p.packageID, " +
+               "p.orderID, " +
+               "p.weight, " +
+               "p.volume, " +
+               "p.packageStatus, " +
+               "p.currentStatus, " +
+               "sender.name AS senderName, " +
+               "sender.phone AS senderPhone, " +
+               "receiver.name AS receiverName, " +
+               "receiver.phone AS receiverPhone, " +
+               "way.origin, " +
+               "way.destination, " +
+               "c.companyName " +
+               "FROM " + TABLE + " p " +
+               "LEFT JOIN orders o ON p.orderID = o.orderID " +
+               "LEFT JOIN user sender ON o.senderID = sender.userID " +
+               "LEFT JOIN user receiver ON o.receiverID = receiver.userID " +
+               "LEFT JOIN waybill way ON p.packageID = way.packageID " +
+               "LEFT JOIN company c ON way.companyID = c.companyID";
     }
 
     @Override
     protected String getFindByIDSQL() {
-        return "SELECT packageID, orderID, weight, volume, packageStatus, currentStatus FROM " + TABLE + " WHERE packageID = ?";
+        return "SELECT " +
+               "p.packageID, " +
+               "p.orderID, " +
+               "p.weight, " +
+               "p.volume, " +
+               "p.packageStatus, " +
+               "p.currentStatus, " +
+               "sender.name AS senderName, " +
+               "sender.phone AS senderPhone, " +
+               "receiver.name AS receiverName, " +
+               "receiver.phone AS receiverPhone, " +
+               "way.origin, " +
+               "way.destination, " +
+               "c.companyName " +
+               "FROM " + TABLE + " p " +
+               "LEFT JOIN orders o ON p.orderID = o.orderID " +
+               "LEFT JOIN user sender ON o.senderID = sender.userID " +
+               "LEFT JOIN user receiver ON o.receiverID = receiver.userID " +
+               "LEFT JOIN waybill way ON p.packageID = way.packageID " +
+               "LEFT JOIN company c ON way.companyID = c.companyID " +
+               "WHERE p.packageID = ?";
     }
 
     @Override
@@ -31,6 +69,21 @@ public class PackageDAO extends BaseDAO<PackageEntity, Integer> {
         pkg.setVolume(rs.getDouble("volume"));
         pkg.setPackageStatus(rs.getString("packageStatus"));
         pkg.setCurrentStatus(rs.getString("currentStatus"));
+        
+        // 设置UI字段
+        pkg.setSenderName(rs.getString("senderName"));
+        pkg.setSenderPhone(rs.getString("senderPhone"));
+        pkg.setReceiverName(rs.getString("receiverName"));
+        pkg.setReceiverPhone(rs.getString("receiverPhone"));
+        
+        // 使用起点和终点作为类型和描述（如果需要）
+        String origin = rs.getString("origin");
+        String destination = rs.getString("destination");
+        pkg.setType(origin + " → " + destination);
+        pkg.setDescription("从 " + origin + " 到 " + destination);
+        
+        pkg.setCompanyName(rs.getString("companyName"));
+        
         return pkg;
     }
 

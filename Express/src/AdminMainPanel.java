@@ -19,7 +19,6 @@ public class AdminMainPanel extends BasePanel {
         tabbedPane.addTab("配送员管理", new DeliveryManManagementPanel());
         tabbedPane.addTab("员工管理", new StaffManagementPanel());
         tabbedPane.addTab("站点报表", new StationReportPanel());
-        tabbedPane.addTab("系统设置", new SystemSettingsPanel());
 
         add(tabbedPane, BorderLayout.CENTER);
 
