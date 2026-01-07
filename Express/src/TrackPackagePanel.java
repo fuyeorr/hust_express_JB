@@ -72,27 +72,38 @@ public class TrackPackagePanel extends BasePanel {
 
             // 查询运输轨迹
             List<Track> tracks = queryService.getPackageTracks(packageId);
-            
+
             // 清空旧数据
             tableModel.setRowCount(0);
-            
+
             // 填充轨迹数据
             if (tracks != null && !tracks.isEmpty()) {
                 for (Track track : tracks) {
                     tableModel.addRow(new Object[]{
-                        track.getUpdateTime(),
-                        track.getLocation(),
-                        track.getStatus(),
-                        track.getDescription()
+                        track.getTrackTime(),
+                        track.getCurrentLocation(),
+                        track.getTrackInfo(),
+                        track.getTrackInfo()
                     });
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "暂无轨迹信息");
             }
-            
+
             // 显示异常记录
-            String exceptions = queryService.getPackageExceptions(packageId);
-            detailsArea.setText(exceptions != null ? exceptions : "无异常记录");
+            List<ExceptionRecord> exceptions = queryService.getPackageExceptions(packageId);
+            if (exceptions == null || exceptions.isEmpty()) {
+                detailsArea.setText("无异常记录");
+            } else {
+                StringBuilder sb = new StringBuilder();
+                for (ExceptionRecord ex : exceptions) {
+                    sb.append(ex.getExceptionType() != null ? ex.getExceptionType() : "异常")
+                            .append(": ")
+                            .append(ex.getDescription() != null ? ex.getDescription() : "")
+                            .append("\n");
+                }
+                detailsArea.setText(sb.toString());
+            }
             
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "包裹ID必须是数字");

@@ -1,7 +1,12 @@
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TrackDAO extends BaseDAO<Track, Integer> {
     private static final String TABLE = "`Track`";
@@ -95,6 +100,38 @@ public class TrackDAO extends BaseDAO<Track, Integer> {
     @Override
     protected String getInsertSQL() {
         return "INSERT INTO " + TABLE + " (wayID, deliveryID, trackTime, currentLocation, trackInfo) VALUES (?, ?, ?, ?, ?)";
+    }
+
+    public List<Track> findByWayID(int wayID) {
+        List<Track> tracks = new ArrayList<>();
+        String sql = "SELECT trackID, wayID, deliveryID, trackTime, currentLocation, trackInfo FROM " + TABLE + " WHERE wayID = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, wayID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    tracks.add(mapResultSetToEntity(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tracks;
+    }
+
+    public Map<Integer, Long> countByDeliveryID() {
+        Map<Integer, Long> result = new HashMap<>();
+        String sql = "SELECT deliveryID, COUNT(*) as count FROM " + TABLE + " GROUP BY deliveryID";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                result.put(rs.getInt("deliveryID"), rs.getLong("count"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
 

@@ -5,7 +5,7 @@ import java.sql.Types;
 
 public class OrderDAO extends BaseDAO<OrderRecord, Integer> {
 
-    private static final String TABLE = "`Order`";
+    private static final String TABLE = "`Orders`";
 
     @Override
     protected String getFindAllSQL() {

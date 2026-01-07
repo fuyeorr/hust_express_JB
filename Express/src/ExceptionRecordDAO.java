@@ -1,6 +1,9 @@
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExceptionRecordDAO extends BaseDAO<ExceptionRecord, Integer> {
     private static final String TABLE = "`Exception`";
@@ -83,5 +86,40 @@ public class ExceptionRecordDAO extends BaseDAO<ExceptionRecord, Integer> {
     @Override
     protected String getInsertSQL() {
         return "INSERT INTO " + TABLE + " (packageID, exceptionType, exceptionName, description) VALUES (?, ?, ?, ?)";
+    }
+
+    public List<ExceptionRecord> findByPackageID(int packageID) {
+        List<ExceptionRecord> exceptions = new ArrayList<>();
+        String sql = "SELECT exceptionID, packageID, exceptionType, exceptionName, description FROM " + TABLE + " WHERE packageID = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, packageID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    exceptions.add(mapResultSetToEntity(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return exceptions;
+    }
+
+    public long countByStationID(int stationID) {
+        String sql = "SELECT COUNT(DISTINCT e.exceptionID) as count FROM " + TABLE + " e " +
+                     "INNER JOIN `Storage` s ON e.packageID = s.packageID " +
+                     "WHERE s.stationID = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, stationID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("count");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

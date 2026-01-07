@@ -1,14 +1,18 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class StationReportPanel extends BasePanel {
     private JTable reportTable;
     private DefaultTableModel tableModel;
+    private StationReportService reportService;
+    private JTextField stationField;
+    private JLabel storageLabel;
+    private JLabel signLabel;
+    private JLabel exceptionLabel;
 
     public StationReportPanel() {
+        this.reportService = new StationReportService();
         initUI();
     }
 
@@ -20,17 +24,13 @@ public class StationReportPanel extends BasePanel {
         JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         datePanel.setBackground(UIConstants.BACKGROUND_COLOR);
 
-        JLabel startLabel = new JLabel("开始日期：");
-        JTextField startDateField = new JTextField(10);
-        JLabel endLabel = new JLabel("结束日期：");
-        JTextField endDateField = new JTextField(10);
+        JLabel stationLabel = new JLabel("站点ID：");
+        stationField = new JTextField(6);
         JButton queryButton = new JButton("查询");
         queryButton.addActionListener(e -> handleQuery());
 
-        datePanel.add(startLabel);
-        datePanel.add(startDateField);
-        datePanel.add(endLabel);
-        datePanel.add(endDateField);
+        datePanel.add(stationLabel);
+        datePanel.add(stationField);
         datePanel.add(queryButton);
         add(datePanel, BorderLayout.NORTH);
 
@@ -39,13 +39,10 @@ public class StationReportPanel extends BasePanel {
         statsPanel.setBackground(UIConstants.BACKGROUND_COLOR);
         statsPanel.setBorder(BorderFactory.createTitledBorder("统计概览"));
 
-        String[] statLabels = {"入库总数", "签收总数", "异常数量", "平均配送时间"};
-        for (String label : statLabels) {
-            JPanel stat = new JPanel();
-            stat.setBackground(UIConstants.BACKGROUND_COLOR);
-            stat.add(new JLabel(label + ": 0"));
-            statsPanel.add(stat);
-        }
+        storageLabel = createStatLabel(statsPanel, "入库总数");
+        signLabel = createStatLabel(statsPanel, "签收总数");
+        exceptionLabel = createStatLabel(statsPanel, "异常数量");
+        createStatLabel(statsPanel, "平均配送时间");
         add(statsPanel, BorderLayout.NORTH);
 
         // 表格
@@ -68,15 +65,55 @@ public class StationReportPanel extends BasePanel {
         loadData();
     }
 
+    private JLabel createStatLabel(JPanel container, String name) {
+        JPanel stat = new JPanel();
+        stat.setBackground(UIConstants.BACKGROUND_COLOR);
+        JLabel label = new JLabel(name + ": 0");
+        stat.add(label);
+        container.add(stat);
+        return label;
+    }
+
     private void loadData() {
-        // TODO: 从数据库加载报表数据
-        tableModel.addRow(new Object[]{"张三", 50, 48, 2, "2小时"});
-        tableModel.addRow(new Object[]{"李四", 45, 43, 2, "2.5小时"});
+        stationField.setText("1");
+        handleQuery();
     }
 
     private void handleQuery() {
-        // TODO: 根据日期范围查询
-        loadData();
+        String stationText = stationField.getText().trim();
+        if (stationText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "请输入站点ID");
+            return;
+        }
+
+        try {
+            int stationId = Integer.parseInt(stationText);
+            StationReportService.StationReportResult result = reportService.stationDailyReport(stationId);
+
+            if (result == null) {
+                JOptionPane.showMessageDialog(this, "暂无数据");
+                return;
+            }
+
+            storageLabel.setText("入库总数: " + result.getStorageCount());
+            signLabel.setText("签收总数: " + result.getSignCount());
+            exceptionLabel.setText("异常数量: " + result.getExceptionCount());
+
+            tableModel.setRowCount(0);
+            for (StationReportService.StationReportResult.DeliveryStat stat : result.getDeliveryStats()) {
+                tableModel.addRow(new Object[]{
+                        stat.getDeliveryId(),
+                        stat.getDeliveryCount(),
+                        "",
+                        "",
+                        "N/A"
+                });
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "站点ID必须是数字");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "查询失败: " + ex.getMessage());
+        }
     }
 
     private void handleExport() {

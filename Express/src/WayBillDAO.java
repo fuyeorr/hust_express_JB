@@ -1,3 +1,4 @@
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -98,5 +99,21 @@ public class WayBillDAO extends BaseDAO<WayBill, Integer> {
     @Override
     protected String getInsertSQL() {
         return "INSERT INTO " + TABLE + " (packageID, companyID, origin, destination, sendTime, wayStatus) VALUES (?, ?, ?, ?, ?, ?)";
+    }
+
+    public WayBill findByPackageID(int packageID) {
+        String sql = "SELECT wayID, packageID, companyID, origin, destination, sendTime, wayStatus FROM " + TABLE + " WHERE packageID = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, packageID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToEntity(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -4,8 +4,10 @@ import java.awt.*;
 public class QueryPanel extends BasePanel {
     private JTextField queryField;
     private ResultsPanel resultsPanel;
+    private QueryService queryService;
 
     public QueryPanel() {
+        this.queryService = new QueryService();
         initUI();
     }
 
@@ -32,9 +34,7 @@ public class QueryPanel extends BasePanel {
         if (text.isEmpty()) {
             // load all
             try {
-                PackageDAO dao = new PackageDAO();
-                java.util.List list = dao.findAll();
-                resultsPanel.showPackages(list);
+                resultsPanel.showPackages(queryService.getAllPackages());
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "查询失败: " + ex.getMessage());
             }
@@ -43,8 +43,7 @@ public class QueryPanel extends BasePanel {
 
         try {
             int id = Integer.parseInt(text);
-            PackageDAO dao = new PackageDAO();
-            Object pkg = dao.findByID(id);
+            Object pkg = queryService.getPackageInfo(id);
             if (pkg != null) {
                 resultsPanel.showSingle(pkg);
             } else {

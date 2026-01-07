@@ -160,28 +160,35 @@ public class SendPackagePanel extends BasePanel {
         String packageType = (String) packageTypeCombo.getSelectedItem();
         String description = descriptionArea.getText();
 
-        if (senderName.isEmpty() || receiverName.isEmpty() || weight.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "请填写必要信息");
+        if (senderName.isEmpty() || receiverName.isEmpty() || weight.isEmpty() || senderPhone.isEmpty() || receiverPhone.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "请填写必要信息（含电话）");
             return;
         }
 
         try {
             double weightValue = Double.parseDouble(weight);
 
-            // 创建包裹实体并调用业务层（使用占位 userID=0，实际流程应先创建/选择用户）
             PackageEntity packageEntity = new PackageEntity();
             packageEntity.setType(packageType);
             packageEntity.setWeight(weightValue);
             packageEntity.setCurrentStatus("待发出");
             packageEntity.setDescription(description);
+            packageEntity.setSenderName(senderName);
+            packageEntity.setSenderPhone(senderPhone);
+            packageEntity.setReceiverName(receiverName);
+            packageEntity.setReceiverPhone(receiverPhone);
 
-            // 调用业务层创建订单（OrderService.createOrder(senderID, receiverID, pkg)）
             try {
-                orderService.createOrder(0, 0, packageEntity);
-                JOptionPane.showMessageDialog(this, "寄件单提交成功");
+                orderService.createOrderWithUsers(senderName, senderPhone, receiverName, receiverPhone, packageEntity);
+                String message = String.format(
+                    "寄件单提交成功！\n\n包裹ID: %d\n订单ID: %d\n\n已自动分配快递员\n请使用包裹ID进行查询和取件",
+                    packageEntity.getPackageID(),
+                    packageEntity.getOrderID()
+                );
+                JOptionPane.showMessageDialog(this, message, "提交成功", JOptionPane.INFORMATION_MESSAGE);
                 resetForm();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "提交失败: " + e.getMessage());
+                JOptionPane.showMessageDialog(this, "提交失败: " + e.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
             }
             
         } catch (NumberFormatException ex) {

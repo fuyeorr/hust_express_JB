@@ -1,3 +1,4 @@
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -87,5 +88,21 @@ public class UserDAO extends BaseDAO<User, Integer> {
     @Override
     protected String getInsertSQL() {
         return "INSERT INTO " + TABLE + " (name, phone, address, sex, userType) VALUES (?, ?, ?, ?, ?)";
+    }
+
+    public User findByPhone(String phone) {
+        String sql = "SELECT userID, name, phone, address, sex, userType FROM " + TABLE + " WHERE phone = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, phone);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToEntity(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
